@@ -16,6 +16,26 @@ Implementation of a terminal text buffer in Kotlin for JetBrains internship task
 ```bash
 ./gradlew test
 ```
+## Flowchart
+``` mermaid
+flowchart TD
+    A[Shell sends text] --> B[TerminalBuffer.writeText]
+    B --> C[Read cursor position]
+    C --> D[For each character]
+    D --> E[Create Cell with char + current attributes]
+    E --> F[Place Cell in Screen at cursor position]
+    F --> G[Move cursor right by 1]
+    G --> H{Cursor at end of line?}
+    H -->|No| D
+    H -->|Yes| I{Wrap enabled?}
+    I -->|Yes| J[Move cursor to next line]
+    J --> K{Screen full?}
+    K -->|No| D
+    K -->|Yes| L[Push top line to Scrollback]
+    L --> D
+    I -->|No| M[Stop writing]
+```
+
 
 ## TODO
 
