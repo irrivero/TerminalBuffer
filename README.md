@@ -40,7 +40,7 @@ flowchart TD
 ## TODO
 
 ### Setup
-- [ ] Project structure with Kotlin + Gradle
+- [x] Project structure with Kotlin + Gradle
 - [ ] Cell data class (character, foreground, background, style flags)
 - [ ] TerminalBuffer class with width, height, scrollback
 
