@@ -35,7 +35,77 @@ flowchart TD
     L --> D
     I -->|No| M[Stop writing]
 ```
+``` mermaid
+classDiagram
+    class TextAttributes {
+        +foreground: Color
+        +background: Color
+        +bold: Boolean
+        +italic: Boolean
+        +underline: Boolean
+    }
 
+    class Cell {
+        +char: Char?
+        +attributes: TextAttributes
+        +wide: Boolean
+    }
+
+    class Cursor {
+        +column: Int
+        +row: Int
+        +width: Int
+        +height: Int
+        +move(direction, n)
+        +set(column, row)
+        +get() Pair
+    }
+
+    class Screen {
+        +width: Int
+        +height: Int
+        -grid: Array of Array of Cell
+        +getCell(col, row) Cell
+        +setCell(col, row, cell)
+        +insertEmptyLine()
+        +clear()
+    }
+
+    class Scrollback {
+        +maxSize: Int
+        -lines: List of Array of Cell
+        +push(line)
+        +getLine(index) Array of Cell
+        +size() Int
+    }
+
+    class TerminalBuffer {
+        +width: Int
+        +height: Int
+        +maxScrollback: Int
+        -screen: Screen
+        -scrollback: Scrollback
+        -cursor: Cursor
+        -attributes: TextAttributes
+        +writeText(text)
+        +insertText(text)
+        +fillLine(char)
+        +moveCursor(direction, n)
+        +clearScreen()
+        +clearAll()
+        +getLine(index) String
+        +getScreenContent() String
+        +getAllContent() String
+    }
+
+    TerminalBuffer --> Screen
+    TerminalBuffer --> Scrollback
+    TerminalBuffer --> Cursor
+    TerminalBuffer --> TextAttributes
+    Screen --> Cell
+    Scrollback --> Cell
+    Cell --> TextAttributes
+```
 
 ## TODO
 
