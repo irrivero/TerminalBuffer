@@ -30,6 +30,23 @@ class TerminalBuffer(
         }
     }
 
+    fun insertText(text: String) {
+        for (char in text) {
+            screen.setCell(cursor.column, cursor.row, Cell(char, attributes))
+            if (cursor.column < width - 1) {
+                cursor.moveRight()
+            } else {
+                if (cursor.row < height - 1) {
+                    cursor.set(0, cursor.row + 1)
+                } else {
+                    val topLine = screen.getTopLineAndScroll()
+                    scrollback.push(topLine)
+                    cursor.set(0, cursor.row)
+                }
+            }
+        }
+    }
+
     fun fillLine(char: Char?) {
         for (col in 0 until width)
             screen.setCell(col, cursor.row, Cell(char, attributes))
@@ -72,21 +89,5 @@ class TerminalBuffer(
         }
         return if (scrollbackContent.isEmpty()) getScreenContent()
         else "$scrollbackContent\n${getScreenContent()}"
-    }
-    fun insertText(text: String) {
-        for (char in text) {
-            screen.setCell(cursor.column, cursor.row, Cell(char, attributes))
-            if (cursor.column < width - 1) {
-                cursor.moveRight()
-            } else {
-                if (cursor.row < height - 1) {
-                    cursor.set(0, cursor.row + 1)
-                } else {
-                    val topLine = screen.getTopLineAndScroll()
-                    scrollback.push(topLine)
-                    cursor.set(0, cursor.row)
-                }
-            }
-        }
     }
 }
