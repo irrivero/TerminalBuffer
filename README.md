@@ -91,6 +91,22 @@ flowchart TD
     I -->|No| M[Stop writing]
 ```
 
+## Design Decisions
+
+**ArrayDeque for Scrollback** — allows efficient push and eviction
+from both ends without copying the entire structure.
+
+**Immutable Cell** — Cell is a data class, meaning it is replaced
+rather than mutated. This avoids bugs from shared state.
+
+**Cursor bounds enforced internally** — Cursor uses coerceIn so
+it is impossible to place it outside the screen from anywhere
+in the codebase.
+
+**Screen and Scrollback are separate** — Screen is mutable and
+editable, Scrollback is read-only history. Keeping them separate
+makes the distinction clear and prevents accidental edits to history.
+
 ## TODO
 
 ### Setup
