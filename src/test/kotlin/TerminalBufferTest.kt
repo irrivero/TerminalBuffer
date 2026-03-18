@@ -19,6 +19,14 @@ class TerminalBufferTest {
     }
 
     @Test
+    fun `cursor moves up`() {
+        val buffer = createBuffer()
+        buffer.setCursor(0, 5)
+        buffer.moveCursorUp(3)
+        assertEquals(2, buffer.getCursorRow())
+    }
+
+    @Test
     fun `cursor does not go beyond right edge`() {
         val buffer = createBuffer()
         buffer.moveCursorRight(100)
@@ -37,6 +45,13 @@ class TerminalBufferTest {
         val buffer = createBuffer()
         buffer.moveCursorDown(100)
         assertEquals(23, buffer.getCursorRow())
+    }
+
+    @Test
+    fun `cursor does not go beyond top edge`() {
+        val buffer = createBuffer()
+        buffer.moveCursorUp(10)
+        assertEquals(0, buffer.getCursorRow())
     }
 
     @Test

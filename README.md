@@ -126,7 +126,7 @@ makes the distinction clear and prevents accidental edits to history.
 
 ### Editing
 - [x] Write text at cursor position
-- [ ] Insert text with wrapping
+- [x] Insert text with wrapping
 - [x] Fill line with character
 - [x] Insert empty line at bottom
 - [x] Clear screen
@@ -141,7 +141,7 @@ makes the distinction clear and prevents accidental edits to history.
 
 ### Tests
 - [x] Basic operations
-- [ ] Edge cases and boundary conditions
+- [x] Edge cases and boundary conditions
 
 ### Bonus
 - [ ] Wide characters (CJK, emoji)
