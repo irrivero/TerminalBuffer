@@ -168,4 +168,14 @@ class TerminalBufferTest {
         buffer.clearAll()
         assertEquals("", buffer.getLine(0).trim())
     }
+
+    @Test
+    fun `get attributes at position returns correct attributes`() {
+        val buffer = createBuffer()
+        val attrs = TextAttributes(foreground = Color.BLUE, underline = true)
+        buffer.setAttributes(attrs)
+        buffer.writeText("A")
+        assertEquals(Color.BLUE, buffer.getAttributes(0, 0).foreground)
+        assertEquals(true, buffer.getAttributes(0, 0).underline)
+    }
 }

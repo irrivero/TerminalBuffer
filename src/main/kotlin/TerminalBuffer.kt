@@ -58,6 +58,10 @@ class TerminalBuffer(
         return line.joinToString("") { it.char?.toString() ?: " " }
     }
 
+    fun getAttributes(column: Int, row: Int): TextAttributes {
+        return getCell(column, row).attributes
+    }
+
     fun getScreenContent(): String {
         return (0 until height).joinToString("\n") { getLine(it) }
     }
