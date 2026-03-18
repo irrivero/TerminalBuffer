@@ -95,4 +95,62 @@ class TerminalBufferTest {
         buffer.clearAll()
         assertEquals("", buffer.getLine(0).trim())
     }
+
+    @Test
+    fun `insertText wraps to next line`() {
+        val buffer = TerminalBuffer(width = 5, height = 24, maxScrollback = 100)
+        buffer.insertText("HelloWorld")
+        assertEquals("Hello", buffer.getLine(0).trim())
+        assertEquals("World", buffer.getLine(1).trim())
+    }
+
+    @Test
+    fun `insertText pushes to scrollback when screen is full`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, maxScrollback = 100)
+        buffer.insertText("HelloWorld!")
+        val all = buffer.getAllContent()
+        assertTrue(all.contains("Hello"))
+    }
+
+    @Test
+    fun `scrollback does not exceed max size`() {
+        val buffer = TerminalBuffer(width = 80, height = 24, maxScrollback = 3)
+        repeat(10) {
+            buffer.insertEmptyLine()
+        }
+        assertTrue(buffer.getAllContent().isNotEmpty())
+    }
+
+    @Test
+    fun `set cursor position works correctly`() {
+        val buffer = createBuffer()
+        buffer.setCursor(10, 5)
+        assertEquals(10, buffer.getCursorColumn())
+        assertEquals(5, buffer.getCursorRow())
+    }
+
+    @Test
+    fun `set cursor clamps to bounds`() {
+        val buffer = createBuffer()
+        buffer.setCursor(200, 200)
+        assertEquals(79, buffer.getCursorColumn())
+        assertEquals(23, buffer.getCursorRow())
+    }
+
+    @Test
+    fun `write text overwrites existing content`() {
+        val buffer = createBuffer()
+        buffer.writeText("Hello")
+        buffer.setCursor(0, 0)
+        buffer.writeText("World")
+        assertEquals("World", buffer.getLine(0).substring(0, 5))
+    }
+
+    @Test
+    fun `clear all resets scrollback`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, maxScrollback = 100)
+        buffer.insertText("HelloWorld")
+        buffer.clearAll()
+        assertEquals("", buffer.getLine(0).trim())
+    }
 }
