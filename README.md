@@ -4,8 +4,9 @@ Implementation of a terminal text buffer in Kotlin for JetBrains internship task
 
 ## Requirements
 
-- Kotlin
-- Gradle
+- Kotlin 1.9+
+- Java 23
+- Gradle 8.13
 
 ## Build
 ```bash
@@ -16,8 +17,62 @@ Implementation of a terminal text buffer in Kotlin for JetBrains internship task
 ```bash
 ./gradlew test
 ```
-## Flowchart
-``` mermaid
+
+## Architecture
+```mermaid
+classDiagram
+    class TextAttributes {
+        +foreground: Color
+        +background: Color
+        +bold: Boolean
+        +italic: Boolean
+        +underline: Boolean
+    }
+    class Cell {
+        +char: Char?
+        +attributes: TextAttributes
+        +wide: Boolean
+    }
+    class Cursor {
+        +column: Int
+        +row: Int
+        +move(direction, n)
+        +set(column, row)
+    }
+    class Screen {
+        +width: Int
+        +height: Int
+        +getCell(col, row) Cell
+        +setCell(col, row, cell)
+        +clear()
+    }
+    class Scrollback {
+        +maxSize: Int
+        +push(line)
+        +getLine(index) Array
+        +size() Int
+    }
+    class TerminalBuffer {
+        +width: Int
+        +height: Int
+        +maxScrollback: Int
+        +writeText(text)
+        +fillLine(char)
+        +clearScreen()
+        +getLine(index) String
+        +getScreenContent() String
+    }
+    TerminalBuffer --> Screen
+    TerminalBuffer --> Scrollback
+    TerminalBuffer --> Cursor
+    TerminalBuffer --> TextAttributes
+    Screen --> Cell
+    Scrollback --> Cell
+    Cell --> TextAttributes
+```
+
+## Flow
+```mermaid
 flowchart TD
     A[Shell sends text] --> B[TerminalBuffer.writeText]
     B --> C[Read cursor position]
@@ -35,112 +90,41 @@ flowchart TD
     L --> D
     I -->|No| M[Stop writing]
 ```
-``` mermaid
-classDiagram
-    class TextAttributes {
-        +foreground: Color
-        +background: Color
-        +bold: Boolean
-        +italic: Boolean
-        +underline: Boolean
-    }
-
-    class Cell {
-        +char: Char?
-        +attributes: TextAttributes
-        +wide: Boolean
-    }
-
-    class Cursor {
-        +column: Int
-        +row: Int
-        +width: Int
-        +height: Int
-        +move(direction, n)
-        +set(column, row)
-        +get() Pair
-    }
-
-    class Screen {
-        +width: Int
-        +height: Int
-        -grid: Array of Array of Cell
-        +getCell(col, row) Cell
-        +setCell(col, row, cell)
-        +insertEmptyLine()
-        +clear()
-    }
-
-    class Scrollback {
-        +maxSize: Int
-        -lines: List of Array of Cell
-        +push(line)
-        +getLine(index) Array of Cell
-        +size() Int
-    }
-
-    class TerminalBuffer {
-        +width: Int
-        +height: Int
-        +maxScrollback: Int
-        -screen: Screen
-        -scrollback: Scrollback
-        -cursor: Cursor
-        -attributes: TextAttributes
-        +writeText(text)
-        +insertText(text)
-        +fillLine(char)
-        +moveCursor(direction, n)
-        +clearScreen()
-        +clearAll()
-        +getLine(index) String
-        +getScreenContent() String
-        +getAllContent() String
-    }
-
-    TerminalBuffer --> Screen
-    TerminalBuffer --> Scrollback
-    TerminalBuffer --> Cursor
-    TerminalBuffer --> TextAttributes
-    Screen --> Cell
-    Scrollback --> Cell
-    Cell --> TextAttributes
-```
 
 ## TODO
 
 ### Setup
 - [x] Project structure with Kotlin + Gradle
-- [ ] Cell data class (character, foreground, background, style flags)
-- [ ] TerminalBuffer class with width, height, scrollback
+- [x] Cell data class (character, foreground, background, style flags)
+- [x] TerminalBuffer class with width, height, scrollback
 
 ### Cursor
-- [ ] Get/set cursor position
-- [ ] Move cursor up, down, left, right by N cells
-- [ ] Cursor bounds checking
+- [x] Get/set cursor position
+- [x] Move cursor up, down, left, right by N cells
+- [x] Cursor bounds checking
 
 ### Attributes
-- [ ] Set foreground color
-- [ ] Set background color
-- [ ] Set style flags (bold, italic, underline)
+- [x] Set foreground color
+- [x] Set background color
+- [x] Set style flags (bold, italic, underline)
 
 ### Editing
-- [ ] Write text at cursor position
+- [x] Write text at cursor position
 - [ ] Insert text with wrapping
-- [ ] Fill line with character
-- [ ] Insert empty line at bottom
-- [ ] Clear screen
-- [ ] Clear screen and scrollback
+- [x] Fill line with character
+- [x] Insert empty line at bottom
+- [x] Clear screen
+- [x] Clear screen and scrollback
 
 ### Content Access
-- [ ] Get character at position (screen and scrollback)
-- [ ] Get attributes at position (screen and scrollback)
-- [ ] Get line as string
-- [ ] Get entire screen as string
-- [ ] Get screen + scrollback as string
+- [x] Get character at position (screen and scrollback)
+- [x] Get attributes at position (screen and scrollback)
+- [x] Get line as string
+- [x] Get entire screen as string
+- [x] Get screen + scrollback as string
 
 ### Tests
-- [ ] Basic operations
+- [x] Basic operations
 - [ ] Edge cases and boundary conditions
 
 ### Bonus
