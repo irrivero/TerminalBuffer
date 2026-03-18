@@ -4,7 +4,7 @@ Implementation of a terminal text buffer in Kotlin for JetBrains internship task
 
 ## Requirements
 
-- Kotlin 1.9+
+- Kotlin 2.2+
 - Java 23
 - Gradle 8.13
 
