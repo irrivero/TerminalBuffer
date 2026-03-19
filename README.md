@@ -44,6 +44,8 @@ classDiagram
         +height: Int
         +getCell(col, row) Cell
         +setCell(col, row, cell)
+        +setWideCell(col, row, cell)
+        +resize(newWidth, newHeight)
         +clear()
     }
     class Scrollback {
@@ -51,14 +53,17 @@ classDiagram
         +push(line)
         +getLine(index) Array
         +size() Int
+        +resize(newWidth)
     }
     class TerminalBuffer {
         +width: Int
         +height: Int
         +maxScrollback: Int
         +writeText(text)
+        +insertText(text)
         +fillLine(char)
         +clearScreen()
+        +resize(newWidth, newHeight)
         +getLine(index) String
         +getScreenContent() String
     }
@@ -77,18 +82,21 @@ flowchart TD
     A[Shell sends text] --> B[TerminalBuffer.writeText]
     B --> C[Read cursor position]
     C --> D[For each character]
-    D --> E[Create Cell with char + current attributes]
-    E --> F[Place Cell in Screen at cursor position]
-    F --> G[Move cursor right by 1]
-    G --> H{Cursor at end of line?}
-    H -->|No| D
-    H -->|Yes| I{Wrap enabled?}
-    I -->|Yes| J[Move cursor to next line]
-    J --> K{Screen full?}
-    K -->|No| D
-    K -->|Yes| L[Push top line to Scrollback]
-    L --> D
-    I -->|No| M[Stop writing]
+    D --> E{Wide character?}
+    E -->|Yes| F[Place wide Cell + empty companion cell]
+    E -->|No| G[Place Cell in Screen at cursor position]
+    F --> H[Move cursor right by 2]
+    G --> I[Move cursor right by 1]
+    H --> J{Cursor at end of line?}
+    I --> J
+    J -->|No| D
+    J -->|Yes| K{Wrap enabled?}
+    K -->|Yes| L[Move cursor to next line]
+    L --> M{Screen full?}
+    M -->|No| D
+    M -->|Yes| N[Push top line to Scrollback]
+    N --> D
+    K -->|No| O[Stop writing]
 ```
 
 ## Design Decisions
@@ -107,42 +115,36 @@ in the codebase.
 editable, Scrollback is read-only history. Keeping them separate
 makes the distinction clear and prevents accidental edits to history.
 
-## TODO
+**Wide character support** — characters detected as wide (CJK ideographs
+and common emoji) occupy two cells. The first cell holds the character,
+the second is an empty companion cell with `wide = true`. The cursor
+advances by 2. Known limitation: emoji above U+FFFF represented as
+surrogate pairs are not yet handled.
 
-### Setup
-- [x] Project structure with Kotlin + Gradle
-- [x] Cell data class (character, foreground, background, style flags)
-- [x] TerminalBuffer class with width, height, scrollback
+**Resize uses clip/pad strategy** — when the screen grows, new cells are
+filled with empty `Cell()`. When it shrinks, content beyond the new bounds
+is clipped. Scrollback lines are resized the same way. The cursor is clamped
+to the new bounds by recreating the `Cursor` object with the new dimensions.
 
-### Cursor
-- [x] Get/set cursor position
-- [x] Move cursor up, down, left, right by N cells
-- [x] Cursor bounds checking
+## Future improvements
 
-### Attributes
-- [x] Set foreground color
-- [x] Set background color
-- [x] Set style flags (bold, italic, underline)
+**Thread safety** — currently `TerminalBuffer` is not thread-safe. In a real
+terminal emulator the shell writes and the UI reads concurrently. A
+`ReentrantLock` or Kotlin coroutines would be needed.
 
-### Editing
-- [x] Write text at cursor position
-- [x] Insert text with wrapping
-- [x] Fill line with character
-- [x] Insert empty line at bottom
-- [x] Clear screen
-- [x] Clear screen and scrollback
+**Tab character support** — `\t` should move the cursor to the next multiple
+of 8 columns rather than writing a literal tab character.
 
-### Content Access
-- [x] Get character at position (screen and scrollback)
-- [x] Get attributes at position (screen and scrollback)
-- [x] Get line as string
-- [x] Get entire screen as string
-- [x] Get screen + scrollback as string
+**Dedicated scrollback access** — a `getScrollbackLine(index)` method to
+replace the negative index convention in `getLine`, which is convenient
+but not immediately obvious to a new reader.
 
-### Tests
-- [x] Basic operations
-- [x] Edge cases and boundary conditions
+**Variable length lines in scrollback** — instead of fixed-size arrays,
+to save memory for lines that are mostly empty.
 
-### Bonus
-- [ ] Wide characters (CJK, emoji)
-- [ ] Resize
+**Full emoji support** — emoji above U+FFFF require handling surrogate pairs
+at the `String` iteration level rather than `Char` by `Char`.
+
+**Resize with reflow** — the current strategy clips and pads. A more
+advanced implementation would reflow content into the new width, preserving
+all characters as modern terminals like iTerm2 and kitty do.
