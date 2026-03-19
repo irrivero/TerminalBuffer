@@ -43,13 +43,26 @@ class TerminalBuffer(
 
     fun insertText(text: String) {
         for (char in text) {
-            screen.setCell(cursor.column, cursor.row, Cell(char, attributes))
-            if (cursor.column < width - 1) {
-                cursor.moveRight()
+            val wide = isWide(char)
+            val advance = if (wide) 2 else 1
+            if (wide && cursor.column >= width - 1) {
+                if (cursor.row < height - 1) cursor.set(0, cursor.row + 1)
+                else {
+                    val topLine = screen.getTopLineAndScroll()
+                    scrollback.push(topLine)
+                    cursor.set(0, cursor.row)
+                }
+            }
+            if (wide) {
+                screen.setWideCell(cursor.column, cursor.row, Cell(char, attributes, wide = true))
             } else {
-                if (cursor.row < height - 1) {
-                    cursor.set(0, cursor.row + 1)
-                } else {
+                screen.setCell(cursor.column, cursor.row, Cell(char, attributes))
+            }
+            if (cursor.column + advance < width) {
+                cursor.moveRight(advance)
+            } else {
+                if (cursor.row < height - 1) cursor.set(0, cursor.row + 1)
+                else {
                     val topLine = screen.getTopLineAndScroll()
                     scrollback.push(topLine)
                     cursor.set(0, cursor.row)
