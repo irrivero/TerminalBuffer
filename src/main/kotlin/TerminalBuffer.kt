@@ -5,7 +5,7 @@ class TerminalBuffer(
 ) {
     private val screen = Screen(width, height)
     private val scrollback = Scrollback(maxScrollback)
-    private val cursor = Cursor(width, height)
+    private var cursor = Cursor(width, height)
     private var attributes = TextAttributes()
 
     fun setAttributes(newAttributes: TextAttributes) {
@@ -91,7 +91,11 @@ class TerminalBuffer(
     fun resize(newWidth: Int, newHeight: Int) {
         screen.resize(newWidth, newHeight)
         scrollback.resize(newWidth)
-        cursor.set(cursor.column, cursor.row)
+        width = newWidth
+        height = newHeight
+        val newCursor = Cursor(newWidth, newHeight)
+        newCursor.set(cursor.column, cursor.row)
+        cursor = newCursor
     }
 
     fun getCell(column: Int, row: Int): Cell {
