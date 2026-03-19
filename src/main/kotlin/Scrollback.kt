@@ -11,4 +11,17 @@ class Scrollback(private val maxSize: Int) {
     fun size(): Int = lines.size
 
     fun clear() = lines.clear()
+
+    fun resize(newWidth: Int) {
+        val resized = ArrayDeque<Array<Cell>>()
+        for (line in lines) {
+            val newLine = Array(newWidth) { col ->
+                if (col < line.size) line[col]
+                else Cell()
+            }
+            resized.addLast(newLine)
+        }
+        lines.clear()
+        lines.addAll(resized)
+    }
 }
