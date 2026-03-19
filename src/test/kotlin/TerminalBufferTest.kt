@@ -231,4 +231,39 @@ class TerminalBufferTest {
         assertEquals('A', buffer.getCell(0, 0).char)
         assertEquals('B', buffer.getCell(1, 0).char)
     }
+
+    @Test
+    fun `resize larger adds empty cells`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, maxScrollback = 100)
+        buffer.writeText("Hello")
+        buffer.resize(10, 4)
+        assertEquals("Hello", buffer.getLine(0).substring(0, 5))
+        assertEquals(10, buffer.getLine(0).length)
+    }
+
+    @Test
+    fun `resize smaller clips content`() {
+        val buffer = TerminalBuffer(width = 10, height = 5, maxScrollback = 100)
+        buffer.writeText("HelloWorld")
+        buffer.resize(5, 5)
+        assertEquals("Hello", buffer.getLine(0))
+    }
+
+    @Test
+    fun `resize preserves scrollback`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, maxScrollback = 100)
+        buffer.writeText("AAAAA")
+        buffer.insertEmptyLine()
+        buffer.resize(10, 2)
+        assertTrue(buffer.getAllContent().contains("AAAAA"))
+    }
+
+    @Test
+    fun `resize clamps cursor to new bounds`() {
+        val buffer = TerminalBuffer(width = 10, height = 10, maxScrollback = 100)
+        buffer.setCursor(8, 8)
+        buffer.resize(5, 5)
+        assertEquals(4, buffer.getCursorColumn())
+        assertEquals(4, buffer.getCursorRow())
+    }
 }
