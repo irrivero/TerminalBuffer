@@ -1,5 +1,5 @@
-class Screen(val width: Int, val height: Int) {
-    private val grid: Array<Array<Cell>> = Array(height) { Array(width) { Cell() } }
+class Screen(var width: Int, var height: Int) {
+    private var grid: Array<Array<Cell>> = Array(height) { Array(width) { Cell() } }
 
     fun getCell(column: Int, row: Int): Cell = grid[row][column]
 
@@ -32,5 +32,17 @@ class Screen(val width: Int, val height: Int) {
         val top = grid[0].copyOf()
         insertEmptyLineAtBottom()
         return top
+    }
+
+    fun resize(newWidth: Int, newHeight: Int) {
+        val newGrid: Array<Array<Cell>> = Array(newHeight) { row ->
+            Array(newWidth) { col ->
+                if (row < height && col < width) grid[row][col]
+                else Cell()
+            }
+        }
+        grid = newGrid
+        width = newWidth
+        height = newHeight
     }
 }
