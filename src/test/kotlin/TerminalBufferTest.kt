@@ -178,4 +178,33 @@ class TerminalBufferTest {
         assertEquals(Color.BLUE, buffer.getAttributes(0, 0).foreground)
         assertEquals(true, buffer.getAttributes(0, 0).underline)
     }
+    @Test
+    fun `getScreenContent returns all rows joined by newline`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, maxScrollback = 100)
+        buffer.writeText("Hello")
+        val content = buffer.getScreenContent()
+        val lines = content.split("\n")
+        assertEquals(3, lines.size)
+        assertEquals("Hello", lines[0])
+    }
+
+    @Test
+    fun `fillLine with null clears the row`() {
+        val buffer = createBuffer()
+        buffer.writeText("Hello")
+        buffer.setCursor(0, 0)
+        buffer.fillLine(null)
+        assertEquals("", buffer.getLine(0).trim())
+    }
+
+    @Test
+    fun `getAllContent includes scrollback before screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, maxScrollback = 100)
+        buffer.writeText("AAAAA")
+        buffer.setCursor(0, 1)
+        buffer.writeText("BBBBB")
+        buffer.insertEmptyLine()
+        val all = buffer.getAllContent()
+        assertTrue(all.contains("AAAAA"))
+    }
 }
