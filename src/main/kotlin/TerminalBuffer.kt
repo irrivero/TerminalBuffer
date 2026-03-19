@@ -1,6 +1,6 @@
 class TerminalBuffer(
-    val width: Int,
-    val height: Int,
+    var width: Int,
+    var height: Int,
     val maxScrollback: Int
 ) {
     private val screen = Screen(width, height)
@@ -86,6 +86,12 @@ class TerminalBuffer(
     fun clearAll() {
         screen.clear()
         scrollback.clear()
+    }
+
+    fun resize(newWidth: Int, newHeight: Int) {
+        screen.resize(newWidth, newHeight)
+        scrollback.resize(newWidth)
+        cursor.set(cursor.column, cursor.row)
     }
 
     fun getCell(column: Int, row: Int): Cell {
