@@ -21,6 +21,11 @@ class TerminalBuffer(
     fun moveCursorUp(n: Int = 1) = cursor.moveUp(n)
     fun moveCursorDown(n: Int = 1) = cursor.moveDown(n)
 
+    private fun isWide(char: Char): Boolean {
+        return Character.isIdeographic(char.code) ||
+                char.code in 0x1F300..0x1F9FF
+    }
+
     fun writeText(text: String) {
         for (char in text) {
             screen.setCell(cursor.column, cursor.row, Cell(char, attributes))
