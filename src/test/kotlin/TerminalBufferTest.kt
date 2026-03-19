@@ -207,4 +207,28 @@ class TerminalBufferTest {
         val all = buffer.getAllContent()
         assertTrue(all.contains("AAAAA"))
     }
+
+    @Test
+    fun `wide character occupies two cells`() {
+        val buffer = TerminalBuffer(width = 10, height = 5, maxScrollback = 100)
+        buffer.writeText("中")
+        assertEquals('中', buffer.getCell(0, 0).char)
+        assertEquals(null, buffer.getCell(1, 0).char)
+        assertEquals(true, buffer.getCell(1, 0).wide)
+    }
+
+    @Test
+    fun `cursor advances by 2 after wide character`() {
+        val buffer = TerminalBuffer(width = 10, height = 5, maxScrollback = 100)
+        buffer.writeText("中")
+        assertEquals(2, buffer.getCursorColumn())
+    }
+
+    @Test
+    fun `wide character at end of line does not overflow`() {
+        val buffer = TerminalBuffer(width = 3, height = 5, maxScrollback = 100)
+        buffer.writeText("AB中")
+        assertEquals('A', buffer.getCell(0, 0).char)
+        assertEquals('B', buffer.getCell(1, 0).char)
+    }
 }
