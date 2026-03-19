@@ -28,9 +28,15 @@ class TerminalBuffer(
 
     fun writeText(text: String) {
         for (char in text) {
-            screen.setCell(cursor.column, cursor.row, Cell(char, attributes))
-            if (cursor.column < width - 1) {
-                cursor.moveRight()
+            val wide = isWide(char)
+            if (wide && cursor.column >= width - 1) break
+            if (wide) {
+                screen.setWideCell(cursor.column, cursor.row, Cell(char, attributes, wide = true))
+                if (cursor.column < width - 2) cursor.moveRight(2)
+                else cursor.moveRight()
+            } else {
+                screen.setCell(cursor.column, cursor.row, Cell(char, attributes))
+                if (cursor.column < width - 1) cursor.moveRight()
             }
         }
     }
