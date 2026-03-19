@@ -7,6 +7,13 @@ class Screen(val width: Int, val height: Int) {
         grid[row][column] = cell
     }
 
+    fun setWideCell(column: Int, row: Int, cell: Cell) {
+        grid[row][column] = cell.copy(wide = true)
+        if (column + 1 < width) {
+            grid[row][column + 1] = Cell(char = null, wide = true)
+        }
+    }
+
     fun getLine(row: Int): Array<Cell> = grid[row].copyOf()
 
     fun clear() {
